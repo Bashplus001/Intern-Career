@@ -1,0 +1,357 @@
+---
+title: "YOUTUBE ANALYSIS"
+author: "ADEFABI BASIT ADEDOLAPO"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## YOUTUBE ANALYSIS
+
+This dataset contains information about the top YouTube streamers. It has 1000 rows and 9 columns which includes rank, username, categories, subscribers, country, visits, likes, comments, and link. The task is to perform a comprehensive analysis of the dataset to extract insights about the top YouTube content creators. This analysis, which is to be carried out using the R- programming.
+
+The Packages used are
+
+- readr
+- ggplot2
+- reshape2 
+
+Loading the Packages into Rstudio
+```{r}
+library(readr)
+library(ggplot2)
+library(reshape2)
+```
+
+
+
+## Importing the Dataset into R studio
+```{r}
+youtubers_df <- read_csv("C:/Users/BASHIT/Desktop/youtubers_df.csv",col_types = cols(Rank = col_character()))
+youtube <- data.frame(youtubers_df)
+head(youtube)
+```
+I imported the youtube dateset into R studio using the readr library. After importing, i converted the dataset into a dataframe format.
+
+## Summary of the Dataset
+```{r}
+summary(youtube)
+```
+
+The summary statistics result above shows the dataset has 1,000 rows and 9 columns.
+The columns include information such as "Rank," "Username," "Categories," "Subscribers," "Country," "Visits," "Likes," "Comments," and "Links."
+
+
+The mean number of subscribers is approximately 21,894,400. The median is 16,750,000, which suggests that there might be some YouTubers with significantly higher subscriber counts, pulling up the mean.
+
+The average number of visits is 1,209,446. The median is 174,450, indicating that there is variability in the number of visits, with some YouTubers having much higher values.
+
+The mean number of likes is around 53,633. The median is 3,500, which suggests that there may be a few YouTubers with a large number of likes, influencing the mean.
+
+The mean number of comments is 1,289. The median is 67, indicating variability in the number of comments, with some YouTubers having a relatively high number.
+
+
+
+## Structure of the Dataset
+```{r}
+str(youtube)
+```
+The result displayed above gives us the structure of each of the column, this tells us what kind of variables we have in the dataset, which would aid the analysis.
+
+## Assessing Missing Values
+```{r}
+summary(is.na(youtube))
+```
+The result above shows the summary of the dataset to know if there is a missing value. The result denotes all other variables do not contain missing value except the "categories" variable which contain 306 missing values.
+
+
+## Checking for Outliers
+```{r, fig.width=12, fig.height=7, message=FALSE}
+boxplot(youtubers_df[, sapply(youtube, is.numeric)])
+```
+
+The boxplot plot above indicates the presence of annomalies in the dataset
+
+## Identifying the Trend
+
+```{r}
+youtube_missing <- youtubers_df[!is.na(youtube$Categories), ]
+unique_categories_of_missing <- unique(youtube_missing$Categories)
+
+category_counts_no_missing <- table(youtube_missing$Categories)
+cate <- data.frame(category_counts_no_missing)
+head(cate, 10)
+```
+
+## Visualization of Category Distribution
+
+```{r}
+ggplot(youtube_missing, aes(x = Categories)) +
+  geom_bar() +
+  labs(title = "Distribution of Categories among Top YouTube Streamers", x = "Categories", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+The barplot indicates that Musica y baile is the most popular categories
+
+
+## Correlation Analysis
+```{r}
+correlation_matrix <- cor(youtube[, c("Suscribers", "Likes", "Comments")])
+print(correlation_matrix)
+```
+The correlation coefficient between Subscribers and Likes is approximately 0.21.
+Although it indicates a positive correlation. This suggests that, on average, as the number of subscribers increases, there tends to be a slight increase in the number of likes, but the relationship is not very strong.
+
+The correlation coefficient between Subscribers and Comments is approximately 0.036.The correlation is very weak that it may not be practically significant.
+
+The correlation coefficient between Likes and Comments is approximately 0.33.
+This indicates a moderate positive correlation between the number of Likes and Comments.  This suggests that, on average, videos with more likes tend to have more comments, and vice versa. The relationship is moderate, indicating a stronger association compared to subscribers and likes.
+
+
+
+## Audience Study
+###  Distribution of Streamers' Audiences by Country
+
+```{r}
+unique_countries <- unique(youtube$Country)
+country_counts <- table(youtube$Country)
+head(country_counts, 10)
+```
+
+
+## Visualization of Audience Distribution by Country
+```{r}
+ggplot(youtubers_df, aes(x = Country)) +
+  geom_bar() +
+  labs(title = "Distribution of Streamers' Audiences by Country", x = "Country", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+The barplot above indicates Estados Unidos as the country with the highest number of streamer audience followed closely by India
+
+
+## Cross-tabulation of Categories and Countries
+```{r}
+cross_tab <- table(youtube$Categories, youtubers_df$Country)
+head(cross_tab, 5)
+```
+
+
+## Visualization of Regional Preferences for Content Categories:
+```{r, fig.width=15, fig.height=9, message=FALSE}
+cross_tab_melted <- melt(cross_tab)
+
+ggplot(cross_tab_melted, aes(x = Var2, y = value, fill = Var1)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Regional Preferences for Content Categories", x = "Country", y = "Count", fill = "Content Category") +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1),
+        legend.text = element_text(size = 10),  # Adjust legend text size
+        legend.title = element_text(size = 10))  # Adjust legend title size
+```
+
+
+To analyze the distribution of streamers' audiences by country and identify regional preferences for specific content categories, I created a cross-tab from the dataset. From there we can check for the pattern and concentrations of streamers in the categories within specific countries. 
+
+# Performance Metrics
+```{r}
+average_subscribers <- mean(youtube$Suscribers, na.rm = TRUE)
+average_visits <- mean(youtube$Visits, na.rm = TRUE)
+average_likes <- mean(youtube$Likes, na.rm = TRUE)
+average_comments <- mean(youtube$Comments, na.rm = TRUE)
+```
+
+```{r}
+cat("Average Subscribers: ", round(average_subscribers, 2), "\n")
+cat("Average Visits: ", round(average_visits, 2), "\n")
+cat("Average Likes: ", round(average_likes, 2), "\n")
+cat("Average Comments: ", round(average_comments, 2), "\n")
+```
+
+## Average Performance Metrics
+```{r}
+average_metrics <- data.frame(
+  Metric = c("Subscribers", "Visits", "Likes", "Comments"),
+  Average = c(average_subscribers, average_visits, average_likes, average_comments)
+)
+print(average_metrics)
+```
+
+It is evident from both the table and barplot of the average performance metric that the Subscriber  has the highest average value followed by the visits, likes and comment respectively
+
+```{r, fig.width=6, fig.height=3.5, message=FALSE}
+ggplot(average_metrics, aes(x = Metric, y = Average, fill = Metric)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Performance Metrics", x = "Metric", y = "Average Value", fill = "Metric") +
+  theme_minimal()
+```
+
+From the barplot above the subscriber have a higher average than the rest of the variable, while the average of Visit , Likes and comments follows respectively
+
+```{r, fig.width=4, fig.height=3, message=FALSE}
+
+ggplot(youtube, aes(x = factor(1), y = Suscribers)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Subscribers") +
+  theme_minimal()
+```
+
+The boxplot for subscribers reveals outliers at the upper end of the distribution, indicating unusual spikes in subscriber counts
+
+```{r, fig.width=4, fig.height=3, message=FALSE}
+
+ggplot(youtube, aes(x = factor(1), y = Visits)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Visits") +
+  theme_minimal()
+```
+
+The boxplot of visits reveals a limited number of data points as outliers, indicating an unusually high or low visit count
+
+```{r, fig.width=4, fig.height=3, message=FALSE}
+ggplot(youtube, aes(x = factor(1), y = Likes)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Likes") +
+  theme_minimal()
+```
+
+
+Unusual data points were identified in the boxplot, particularly at the lower end of the distribution. These anomalies suggest instances where the number of likes significantly departed from the typical range
+
+```{r, fig.width=4, fig.height=3, message=FALSE}
+ggplot(youtube, aes(x = factor(1), y = Comments)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Comments") +
+  theme_minimal()
+```
+
+The comment boxplot also indiates annomalies in the  lower part of the distribution
+
+
+## Exploring Distribution of Content Categories
+
+```{r}
+category_counts <- table(youtube$Categories)
+print(head(category_counts,10))
+```
+
+```{r}
+
+ggplot(youtube_missing, aes(x = Categories)) +
+  geom_bar() +
+  labs(title = "Distribution of Content Categories", x = "Categories", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+From the plot above Musica y baile is the category with the highest streamers, followed by peliculas animacion. The trend can be seen clearly from the plot above
+
+## Identifying Categories with the Highest Number of Streamers
+
+```{r}
+top_categories <- names(sort(category_counts, decreasing = TRUE)[1:5])
+cat("Top 5 Categories with the Highest Number of Streamers: ", top_categories, "\n")
+```
+
+
+```{r, fig.width=7, fig.height=5, message=FALSE}
+
+
+metrics_of_interest <- c("Suscribers", "Visits", "Likes", "Comments")
+
+for (metric in metrics_of_interest) {
+  top_n_categories <- head(youtube[order(youtube[, metric], decreasing = TRUE), ], 10)
+
+  p <- ggplot(top_n_categories, aes(x = reorder(Categories, -get(metric)), y = get(metric))) +
+    geom_bar(stat = "identity", fill = "skyblue") +
+    labs(title = paste("Top Categories for", metric),
+         x = "Category",
+         y = metric) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(hjust = 0.5))
+  
+  print(p)
+}
+
+```
+
+Top Categories for all metrics which includes: Subscribers, Visit, Likes and comment can be visualize from the bar plot above
+
+## Benchmarking: Calculating and Identifying Streamers with above-average performance
+```{r}
+average_subscribers <- mean(youtube$Suscribers, na.rm = TRUE)
+average_subscribers
+average_visits <- mean(youtube$Visits, na.rm = TRUE)
+average_visits
+average_likes <- mean(youtube$Likes, na.rm = TRUE)
+average_likes
+average_comments <- mean(youtube$Comments, na.rm = TRUE)
+average_comments
+```
+
+From the result above, the average values of the subscribers, visits, likes and comments are calculated to be 21894400, 1209446, 53632.59 and 1288.768 respectively
+
+```{r}
+above_average_streamers <- youtube[
+  youtube$Suscribers > average_subscribers &
+    youtube$Visits > average_visits &
+    youtube$Likes > average_likes &
+    youtube$Comments > average_comments,
+]
+above <- above_average_streamers[, c("Username", "Suscribers", "Visits", "Likes", "Comments")]
+head(above,10)
+```
+
+The result above gives the list of the above average streamers 
+
+## Top Performing Content Creators
+
+```{r}
+
+top_performers <- above_average_streamers[order(above_average_streamers$Suscribers, decreasing = TRUE), ]
+top <- top_performers[, c("Username", "Suscribers", "Visits", "Likes", "Comments")]
+head(top, 10)
+```
+
+
+```{r}
+
+top_n_performers <- head(top_performers, 10)
+
+top_n_performers_melted <- melt(top_n_performers[, c("Username", "Suscribers", "Visits", "Likes", "Comments")], id.vars = "Username")
+
+ggplot(top_n_performers_melted, aes(x = Username, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Top Performing Content Creators for all Metrics",
+       x = "Username",
+       y = "Count",
+       fill = "Metric") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+```{r}
+top_n_performers <- head(top_performers, 10)
+
+ggplot(top_n_performers, aes(x = reorder(Username, -Suscribers), y = Suscribers)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top Performing Content Creators",
+       x = "Username",
+       y = "Number of Subscribers") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        plot.title = element_text(hjust = 0.5))
+
+```
+
+After rearranging the top performers in decreasing order, the result above gives us the top performing content creators which includes MrBeast, PewDiePie, dudeperfect, TaylorSwift, JuegaGerman and others as can be seen in the table above.
